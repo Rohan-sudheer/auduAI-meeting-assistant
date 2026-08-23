@@ -1,4 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// Strip any trailing slash so `${BASE_URL}${path}` never produces a double slash,
+// regardless of whether VITE_API_URL was set with or without one.
+const BASE_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
 
 export interface Meeting {
   id: string;
