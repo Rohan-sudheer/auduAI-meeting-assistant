@@ -1,3 +1,4 @@
+import { Mic, Square } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface Props {
@@ -41,18 +42,33 @@ export function RecordButton({ onRecorded, disabled }: Props) {
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 p-10">
+    <div
+      className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-10 bg-white transition-all duration-150 ${
+        recording ? "border-red-200 shadow-lg shadow-red-500/10" : "border-slate-200 hover:shadow-md"
+      }`}
+    >
       <button
         onClick={recording ? stop : start}
         disabled={disabled}
-        className={`h-16 w-16 rounded-full flex items-center justify-center text-white transition-colors ${
-          recording ? "bg-red-500 animate-pulse" : "bg-indigo-600 hover:bg-indigo-700"
+        className={`h-14 w-14 rounded-full flex items-center justify-center text-white transition-all ${
+          recording ? "bg-red-500 shadow-lg shadow-red-500/30" : "bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20"
         } disabled:opacity-50`}
       >
-        {recording ? "■" : "●"}
+        {recording ? (
+          <Square size={18} fill="currentColor" strokeWidth={0} />
+        ) : (
+          <Mic size={20} strokeWidth={2} />
+        )}
       </button>
-      <span className="text-sm text-gray-500">
-        {recording ? `Recording… ${format(seconds)}` : "Record directly from your browser"}
+      <span className="text-sm text-slate-500">
+        {recording ? (
+          <span className="flex items-center gap-1.5 text-red-600 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+            Recording… {format(seconds)}
+          </span>
+        ) : (
+          "Record directly from your browser"
+        )}
       </span>
     </div>
   );

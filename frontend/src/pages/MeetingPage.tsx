@@ -1,5 +1,15 @@
+import {
+  ArrowLeft,
+  BarChart3,
+  CheckSquare,
+  FileText,
+  ListTree,
+  MessageCircleQuestion,
+  Mic2,
+  ScrollText,
+} from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { api, type Meeting } from "../api/client";
 import { ProcessingView } from "../components/ProcessingView";
@@ -11,10 +21,24 @@ import { TopicsTab } from "../components/tabs/TopicsTab";
 import { TranscriptTab } from "../components/tabs/TranscriptTab";
 import { usePolling } from "../hooks/usePolling";
 
-const TABS = ["Transcript", "Summary", "Action Items", "Topics", "Speaking Stats", "Ask"] as const;
-type Tab = (typeof TABS)[number];
+const TABS = [
+  { key: "Transcript", icon: ScrollText },
+  { key: "Summary", icon: FileText },
+  { key: "Action Items", icon: CheckSquare },
+  { key: "Topics", icon: ListTree },
+  { key: "Speaking Stats", icon: BarChart3 },
+  { key: "Ask", icon: MessageCircleQuestion },
+] as const;
+type Tab = (typeof TABS)[number]["key"];
 
 const TERMINAL_STATUSES = new Set(["ready", "failed"]);
+
+function formatDuration(seconds: number | null): string | null {
+  if (seconds == null) return null;
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return `${m}m ${s}s`;
+}
 
 export function MeetingPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,36 +54,67 @@ export function MeetingPage() {
     return <div className="max-w-xl mx-auto py-24 text-center text-red-600">{error.message}</div>;
   }
   if (!meeting) {
-    return <div className="max-w-xl mx-auto py-24 text-center text-gray-400">Loading…</div>;
+    return <div className="max-w-xl mx-auto py-24 text-center text-slate-400">Loading…</div>;
   }
   if (meeting.status !== "ready") {
     return <ProcessingView status={meeting.status} errorMessage={meeting.error_message} />;
   }
 
+  const duration = formatDuration(meeting.duration_sec);
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">{meeting.title}</h1>
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
-        {TABS.map((t) => (
+    <div className="max-w-4xl mx-auto px-6 py-10 animate-fade-in">
+      <Link
+        to="/"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 mb-4 transition-colors"
+      >
+        <ArrowLeft size={14} />
+        All meetings
+      </Link>
+
+      <div className="flex items-center gap-3 mb-1">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+          <Mic2 size={16} />
+        </span>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight truncate">{meeting.title}</h1>
+      </div>
+      <div className="flex items-center gap-2 text-xs text-slate-400 mb-8 ml-12">
+        <span className="capitalize">{meeting.source}</span>
+        {duration && (
+          <>
+            <span>·</span>
+            <span>{duration}</span>
+          </>
+        )}
+        <span>·</span>
+        <span>{new Date(meeting.created_at).toLocaleString()}</span>
+      </div>
+
+      <div className="flex gap-1 border-b border-slate-200 mb-6 overflow-x-auto">
+        {TABS.map(({ key, icon: Icon }) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-              tab === t
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+            key={key}
+            onClick={() => setTab(key)}
+            className={`flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
+              tab === key
+                ? "border-brand-600 text-brand-700"
+                : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
-            {t}
+            <Icon size={15} strokeWidth={2.25} />
+            {key}
           </button>
         ))}
       </div>
-      {tab === "Transcript" && <TranscriptTab meetingId={meeting.id} />}
-      {tab === "Summary" && <SummaryTab meetingId={meeting.id} />}
-      {tab === "Action Items" && <ActionItemsTab meetingId={meeting.id} />}
-      {tab === "Topics" && <TopicsTab meetingId={meeting.id} />}
-      {tab === "Speaking Stats" && <SpeakingStatsTab meetingId={meeting.id} />}
-      {tab === "Ask" && <AskTab meetingId={meeting.id} />}
+
+      <div key={tab} className="animate-fade-in">
+        {tab === "Transcript" && <TranscriptTab meetingId={meeting.id} />}
+        {tab === "Summary" && <SummaryTab meetingId={meeting.id} />}
+        {tab === "Action Items" && <ActionItemsTab meetingId={meeting.id} />}
+        {tab === "Topics" && <TopicsTab meetingId={meeting.id} />}
+        {tab === "Speaking Stats" && <SpeakingStatsTab meetingId={meeting.id} />}
+        {tab === "Ask" && <AskTab meetingId={meeting.id} />}
+      </div>
     </div>
   );
 }
