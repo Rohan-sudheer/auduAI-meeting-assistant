@@ -40,15 +40,31 @@ def transcribe(audio_path: Path) -> list[Utterance]:
         "Content-Type": content_type,
     }
 
-    with httpx.Client(timeout=300.0) as client:
-        response = client.post(
-            DEEPGRAM_URL,
-            params=params,
-            headers=headers,
-            content=audio_path.read_bytes(),
-        )
-        response.raise_for_status()
-        data = response.json()
+    audio_bytes = audio_path.read_bytes()
+    timeout = httpx.Timeout(connect=30.0, write=900.0, read=900.0, pool=30.0)
+
+    last_error: Exception | None = None
+    for attempt in range(2):  # one retry in case of a transient network stall
+        try:
+            with httpx.Client(timeout=timeout) as client:
+                response = client.post(
+                    DEEPGRAM_URL,
+                    params=params,
+                    headers=headers,
+                    content=audio_bytes,
+                )
+                response.raise_for_status()
+                data = response.json()
+            break
+        except (httpx.WriteTimeout, httpx.ReadTimeout, httpx.ConnectTimeout) as exc:
+            last_error = exc
+            continue
+    else:
+        raise TimeoutError(
+            f"Upload to Deepgram timed out after {len(audio_bytes) / 1_000_000:.1f}MB / 2 attempts. "
+            "This usually means a slow upload connection combined with a large (e.g. uncompressed WAV) "
+            "file - try converting to MP3 first, which is typically 5-10x smaller for the same duration."
+        ) from last_error
 
     raw_utterances = data.get("results", {}).get("utterances", [])
     return [
