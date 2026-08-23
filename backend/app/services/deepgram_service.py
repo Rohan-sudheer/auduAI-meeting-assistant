@@ -40,7 +40,7 @@ def transcribe(audio_path: Path) -> list[Utterance]:
         "Content-Type": content_type,
     }
 
-    with httpx.Client(timeout=180.0) as client:
+    with httpx.Client(timeout=300.0) as client:
         response = client.post(
             DEEPGRAM_URL,
             params=params,
