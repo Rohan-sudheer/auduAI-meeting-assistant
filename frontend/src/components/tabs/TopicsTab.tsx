@@ -40,15 +40,15 @@ export function TopicsTab({ meetingId }: { meetingId: string }) {
         return (
           <div
             key={t.topic_index}
-            className={`rounded-2xl border bg-white overflow-hidden shadow-sm transition-colors ${
-              open ? "border-brand-200" : "border-slate-200"
+            className={`rounded-2xl border backdrop-blur-2xl backdrop-saturate-150 overflow-hidden transition-all duration-300 ${
+              open ? "border-brand-200/70 bg-white/60 shadow-glass" : "border-white/60 bg-white/40 shadow-glass-sm"
             }`}
           >
             <button
               onClick={() => setOpenIndex(open ? null : t.topic_index)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-slate-50 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-white/30 transition-colors"
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700 text-xs font-semibold">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-brand-700 text-xs font-semibold shadow-glass-sm">
                 {t.topic_index}
               </span>
               <span className="text-sm font-medium text-slate-900 flex-1">{t.title}</span>

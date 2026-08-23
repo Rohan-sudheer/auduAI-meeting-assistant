@@ -43,15 +43,17 @@ export function RecordButton({ onRecorded, disabled }: Props) {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-10 bg-white transition-all duration-150 ${
-        recording ? "border-red-200 shadow-lg shadow-red-500/10" : "border-slate-200 hover:shadow-md"
+      className={`flex flex-col items-center justify-center gap-3 rounded-3xl border p-10 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300 ${
+        recording
+          ? "border-red-200/70 bg-red-50/50 shadow-glass"
+          : "border-white/60 bg-white/45 shadow-glass-sm hover:bg-white/60 hover:shadow-glass"
       }`}
     >
       <button
         onClick={recording ? stop : start}
         disabled={disabled}
-        className={`h-14 w-14 rounded-full flex items-center justify-center text-white transition-all ${
-          recording ? "bg-red-500 shadow-lg shadow-red-500/30" : "bg-brand-600 hover:bg-brand-700 shadow-md shadow-brand-500/20"
+        className={`h-14 w-14 rounded-full flex items-center justify-center text-white transition-all duration-300 ${
+          recording ? "bg-red-500 shadow-lg shadow-red-500/30" : "bg-brand-600 hover:bg-brand-700 shadow-glass-sm"
         } disabled:opacity-50`}
       >
         {recording ? (

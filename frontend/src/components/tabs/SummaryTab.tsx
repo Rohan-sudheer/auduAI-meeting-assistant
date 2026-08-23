@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { api, type Summary } from "../../api/client";
+import { GlassCard } from "../GlassCard";
 
 function Card({
   title,
@@ -22,13 +23,13 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h3 className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+    <GlassCard className="p-5">
+      <h3 className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
         <Icon size={14} strokeWidth={2.25} />
         {title}
       </h3>
       {children}
-    </div>
+    </GlassCard>
   );
 }
 
@@ -52,7 +53,7 @@ export function SummaryTab({ meetingId }: { meetingId: string }) {
       {summary.verified && (
         <button
           onClick={() => setShowCritique((v) => !v)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1.5 hover:bg-emerald-100 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50/70 backdrop-blur-xl border border-emerald-200/70 rounded-full px-3 py-1.5 hover:bg-emerald-100/70 transition-colors shadow-glass-sm"
         >
           <ShieldCheck size={13} />
           AI-verified by critique pipeline
@@ -60,7 +61,7 @@ export function SummaryTab({ meetingId }: { meetingId: string }) {
         </button>
       )}
       {showCritique && (
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800 space-y-2 animate-fade-in">
+        <div className="rounded-2xl bg-emerald-50/70 backdrop-blur-xl border border-emerald-200/70 p-4 text-sm text-emerald-800 space-y-2 animate-fade-in shadow-glass-sm">
           {summary.critique_notes.length > 0 ? (
             summary.critique_notes.map((issue, i) => (
               <div key={i}>

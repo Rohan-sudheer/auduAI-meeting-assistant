@@ -1,4 +1,4 @@
-# Meeting Summariser
+# AuduAI
 
 An AI meeting assistant that turns a raw audio recording into a transcript, a structured
 multi-view summary, extracted action items, topic segmentation, speaker analytics — and lets you

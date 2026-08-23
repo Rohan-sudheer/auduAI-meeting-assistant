@@ -2,16 +2,17 @@ import { AlertTriangle, ScrollText } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { api, type Segment, type Speaker } from "../../api/client";
+import { GlassCard } from "../GlassCard";
 import { SpeakerRenameModal } from "../SpeakerRenameModal";
 
 const PAUSE_THRESHOLD_SEC = 1.5;
 
 const SPEAKER_COLORS = [
-  "bg-brand-100 text-brand-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-pink-100 text-pink-700",
-  "bg-sky-100 text-sky-700",
+  "bg-brand-100/80 text-brand-700",
+  "bg-emerald-100/80 text-emerald-700",
+  "bg-amber-100/80 text-amber-700",
+  "bg-pink-100/80 text-pink-700",
+  "bg-sky-100/80 text-sky-700",
 ];
 
 function formatTimestamp(seconds: number): string {
@@ -20,7 +21,7 @@ function formatTimestamp(seconds: number): string {
 }
 
 function colorFor(label: string | null): string {
-  if (!label) return "bg-slate-100 text-slate-600";
+  if (!label) return "bg-slate-100/80 text-slate-600";
   let hash = 0;
   for (let i = 0; i < label.length; i++) hash = (hash + label.charCodeAt(i)) % SPEAKER_COLORS.length;
   return SPEAKER_COLORS[hash];
@@ -63,7 +64,7 @@ export function TranscriptTab({ meetingId }: { meetingId: string }) {
   const renamingSpeaker = speakers.find((s) => s.id === renamingSpeakerId) ?? null;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm space-y-1">
+    <GlassCard className="p-3 space-y-1">
       {segments.map((s, i) => {
         const prev = segments[i - 1];
         const gap = prev ? s.start_time - prev.end_time : 0;
@@ -71,14 +72,14 @@ export function TranscriptTab({ meetingId }: { meetingId: string }) {
           <div key={s.id}>
             {prev && gap > PAUSE_THRESHOLD_SEC && (
               <div className="flex items-center gap-2 text-xs text-slate-400 py-2">
-                <div className="flex-1 h-px bg-slate-200" />
+                <div className="flex-1 h-px bg-white/60" />
                 pause · {gap.toFixed(1)}s
-                <div className="flex-1 h-px bg-slate-200" />
+                <div className="flex-1 h-px bg-white/60" />
               </div>
             )}
             <div
               className={`flex gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                s.is_uncertain ? "bg-amber-50" : "hover:bg-slate-50"
+                s.is_uncertain ? "bg-amber-50/70" : "hover:bg-white/40"
               }`}
             >
               <span className="text-xs text-slate-400 font-mono pt-1 w-12 shrink-0">
@@ -111,6 +112,6 @@ export function TranscriptTab({ meetingId }: { meetingId: string }) {
           onSave={(name) => saveRename(renamingSpeaker.id, name)}
         />
       )}
-    </div>
+    </GlassCard>
   );
 }

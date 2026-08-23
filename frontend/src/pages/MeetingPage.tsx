@@ -66,19 +66,19 @@ export function MeetingPage() {
     <div className="max-w-4xl mx-auto px-6 py-10 animate-fade-in">
       <Link
         to="/"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 mb-4 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-4 transition-colors"
       >
         <ArrowLeft size={14} />
         All meetings
       </Link>
 
       <div className="flex items-center gap-3 mb-1">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/60 backdrop-blur-xl text-brand-600 shadow-glass-sm">
           <Mic2 size={16} />
         </span>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight truncate">{meeting.title}</h1>
       </div>
-      <div className="flex items-center gap-2 text-xs text-slate-400 mb-8 ml-12">
+      <div className="flex items-center gap-2 text-xs text-slate-500 mb-8 ml-12">
         <span className="capitalize">{meeting.source}</span>
         {duration && (
           <>
@@ -90,21 +90,23 @@ export function MeetingPage() {
         <span>{new Date(meeting.created_at).toLocaleString()}</span>
       </div>
 
-      <div className="flex gap-1 border-b border-slate-200 mb-6 overflow-x-auto">
-        {TABS.map(({ key, icon: Icon }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
-              tab === key
-                ? "border-brand-600 text-brand-700"
-                : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <Icon size={15} strokeWidth={2.25} />
-            {key}
-          </button>
-        ))}
+      <div className="mb-6 p-1.5 rounded-2xl bg-white/45 backdrop-blur-2xl backdrop-saturate-150 border border-white/60 shadow-glass-sm overflow-x-auto">
+        <div className="flex gap-1 min-w-max">
+          {TABS.map(({ key, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl whitespace-nowrap transition-all duration-300 ${
+                tab === key
+                  ? "bg-white/90 text-brand-700 shadow-glass-sm"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-white/40"
+              }`}
+            >
+              <Icon size={15} strokeWidth={2.25} />
+              {key}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div key={tab} className="animate-fade-in">

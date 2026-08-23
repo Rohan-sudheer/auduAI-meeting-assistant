@@ -16,9 +16,12 @@ export function SpeakerRenameModal({ currentLabel, currentName, onSave, onClose 
       className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
       onClick={onClose}
     >
-      <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl p-6 w-80 shadow-2xl">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white/70 backdrop-blur-2xl backdrop-saturate-150 border border-white/70 rounded-3xl p-6 w-80 shadow-glass animate-fade-in"
+      >
         <div className="flex items-center gap-2 mb-1">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/70 text-brand-600 shadow-glass-sm">
             <UserRound size={15} />
           </span>
           <h3 className="text-sm font-semibold text-slate-800">Rename {currentLabel}</h3>
@@ -28,7 +31,7 @@ export function SpeakerRenameModal({ currentLabel, currentName, onSave, onClose 
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Priya"
-          className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm mt-3 focus:outline-none focus:ring-2 focus:ring-brand-300"
+          className="w-full border border-white/70 bg-white/50 backdrop-blur-xl rounded-xl px-3.5 py-2.5 text-sm mt-3 focus:outline-none focus:ring-2 focus:ring-brand-300"
           onKeyDown={(e) => {
             if (e.key === "Enter" && name.trim()) onSave(name.trim());
             if (e.key === "Escape") onClose();
@@ -40,7 +43,7 @@ export function SpeakerRenameModal({ currentLabel, currentName, onSave, onClose 
           </button>
           <button
             onClick={() => name.trim() && onSave(name.trim())}
-            className="text-sm px-3.5 py-1.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+            className="text-sm px-3.5 py-1.5 bg-brand-600 text-white rounded-full hover:bg-brand-700 transition-colors shadow-glass-sm"
           >
             Save
           </button>

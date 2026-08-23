@@ -2,6 +2,7 @@ import { Pencil, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { api, type Speaker } from "../../api/client";
+import { GlassCard } from "../GlassCard";
 import { SpeakerRenameModal } from "../SpeakerRenameModal";
 
 const BAR_COLORS = ["bg-brand-500", "bg-emerald-500", "bg-amber-500", "bg-pink-500", "bg-sky-500"];
@@ -44,7 +45,7 @@ export function SpeakingStatsTab({ meetingId }: { meetingId: string }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5">
+    <GlassCard className="p-6 space-y-5">
       {speakers.map((s, i) => {
         const pct = (s.total_speaking_time_sec / total) * 100;
         return (
@@ -61,7 +62,7 @@ export function SpeakingStatsTab({ meetingId }: { meetingId: string }) {
                 {formatDuration(s.total_speaking_time_sec)} · {pct.toFixed(0)}%
               </span>
             </div>
-            <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-2.5 w-full bg-white/50 rounded-full overflow-hidden shadow-inner">
               <div
                 className={`h-full ${BAR_COLORS[i % BAR_COLORS.length]} rounded-full transition-all duration-500`}
                 style={{ width: `${pct}%` }}
@@ -79,6 +80,6 @@ export function SpeakingStatsTab({ meetingId }: { meetingId: string }) {
           onSave={(name) => saveRename(renaming, name)}
         />
       )}
-    </div>
+    </GlassCard>
   );
 }

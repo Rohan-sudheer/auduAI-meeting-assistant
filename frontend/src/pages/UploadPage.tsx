@@ -3,18 +3,19 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { api, type Meeting } from "../api/client";
+import { GlassCard } from "../components/GlassCard";
 import { RecordButton } from "../components/RecordButton";
 import { UploadDropzone } from "../components/UploadDropzone";
 
 const STATUS_META: Record<string, { icon: React.ReactNode; classes: string }> = {
-  ready: { icon: <CheckCircle2 size={13} />, classes: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" },
-  failed: { icon: <XCircle size={13} />, classes: "bg-red-50 text-red-700 ring-red-600/20" },
+  ready: { icon: <CheckCircle2 size={13} />, classes: "bg-emerald-50/80 text-emerald-700 ring-emerald-600/20" },
+  failed: { icon: <XCircle size={13} />, classes: "bg-red-50/80 text-red-700 ring-red-600/20" },
 };
 
 function StatusPill({ status }: { status: string }) {
   const meta = STATUS_META[status] ?? {
     icon: <Loader2 size={13} className="animate-spin" />,
-    classes: "bg-amber-50 text-amber-700 ring-amber-600/20",
+    classes: "bg-amber-50/80 text-amber-700 ring-amber-600/20",
   };
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ${meta.classes}`}>
@@ -61,10 +62,10 @@ export function UploadPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 pt-16 pb-24">
       <div className="text-center mb-12 animate-fade-in">
-        <span className="inline-block text-xs font-semibold tracking-wide text-brand-700 bg-brand-50 rounded-full px-3 py-1 mb-4 ring-1 ring-inset ring-brand-600/20">
+        <span className="inline-block text-xs font-semibold tracking-wide text-brand-700 bg-white/60 backdrop-blur-xl rounded-full px-3 py-1 mb-4 ring-1 ring-inset ring-white/70 shadow-glass-sm">
           AI meeting assistant
         </span>
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight mb-3">
+        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight mb-3">
           Turn any meeting into <span className="text-brand-600">answers</span>
         </h1>
         <p className="text-slate-500 max-w-xl mx-auto leading-relaxed">
@@ -74,7 +75,7 @@ export function UploadPage() {
       </div>
 
       {error && (
-        <div className="mb-6 flex items-start gap-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm animate-fade-in">
+        <div className="mb-6 flex items-start gap-2.5 rounded-2xl bg-red-50/70 backdrop-blur-xl border border-red-200/70 text-red-700 px-4 py-3 text-sm animate-fade-in shadow-glass-sm">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
           {error}
         </div>
@@ -87,22 +88,22 @@ export function UploadPage() {
 
       {meetings.length > 0 && (
         <div className="mt-16 animate-fade-in">
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">
             <Clock size={14} />
             Past meetings
           </h2>
-          <ul className="divide-y divide-slate-100 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+          <GlassCard className="!rounded-2xl divide-y divide-white/50 overflow-hidden">
             {meetings.map((m) => (
-              <li
+              <div
                 key={m.id}
                 onClick={() => navigate(`/meetings/${m.id}`)}
-                className="flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-white/40 transition-colors"
               >
                 <span className="text-slate-700 font-medium text-sm truncate pr-4">{m.title}</span>
                 <StatusPill status={m.status} />
-              </li>
+              </div>
             ))}
-          </ul>
+          </GlassCard>
         </div>
       )}
     </div>

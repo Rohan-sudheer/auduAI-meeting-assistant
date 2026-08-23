@@ -48,11 +48,11 @@ export function AskTab({ meetingId }: { meetingId: string }) {
   };
 
   return (
-    <div className="flex flex-col h-[600px] rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[600px] rounded-3xl border border-white/60 bg-white/40 backdrop-blur-2xl backdrop-saturate-150 shadow-glass overflow-hidden">
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
         {messages.length === 0 && (
           <div className="text-center py-6">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 text-brand-600 mb-3">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/70 text-brand-600 mb-3 shadow-glass-sm">
               <Sparkles size={20} />
             </span>
             <p className="text-sm text-slate-500 mb-4">Ask anything about this meeting — I'll answer from the transcript.</p>
@@ -61,7 +61,7 @@ export function AskTab({ meetingId }: { meetingId: string }) {
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="text-sm text-brand-700 bg-brand-50 border border-brand-200 rounded-full px-3 py-1.5 hover:bg-brand-100 transition-colors"
+                  className="text-sm text-brand-700 bg-white/60 backdrop-blur-xl border border-white/70 rounded-full px-3 py-1.5 hover:bg-white/80 transition-colors shadow-glass-sm"
                 >
                   {s}
                 </button>
@@ -72,15 +72,15 @@ export function AskTab({ meetingId }: { meetingId: string }) {
         {messages.map((m, i) => (
           <div key={i} className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             {m.role === "assistant" && (
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 mt-0.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-brand-700 mt-0.5 shadow-glass-sm">
                 <Bot size={14} />
               </span>
             )}
             <div
-              className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
+              className={`max-w-[75%] rounded-[20px] px-4 py-2.5 text-sm ${
                 m.role === "user"
-                  ? "bg-brand-600 text-white rounded-br-md"
-                  : "bg-slate-100 text-slate-800 rounded-bl-md"
+                  ? "bg-brand-500 text-white shadow-glass-sm"
+                  : "bg-white/65 backdrop-blur-xl border border-white/70 text-slate-800 shadow-glass-sm"
               }`}
             >
               <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
@@ -90,7 +90,7 @@ export function AskTab({ meetingId }: { meetingId: string }) {
                     <span
                       key={ci}
                       title={c.quote ?? ""}
-                      className="text-xs bg-white/80 text-brand-700 rounded-full px-2 py-0.5 border border-brand-200 cursor-help"
+                      className="text-xs bg-white/80 text-brand-700 rounded-full px-2 py-0.5 border border-brand-200/70 cursor-help"
                     >
                       {c.speaker ?? "Unknown"} @ {c.timestamp ?? formatTimestamp(c.start_time)}
                     </span>
@@ -99,7 +99,7 @@ export function AskTab({ meetingId }: { meetingId: string }) {
               )}
             </div>
             {m.role === "user" && (
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 mt-0.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-slate-600 mt-0.5 shadow-glass-sm">
                 <User size={14} />
               </span>
             )}
@@ -121,18 +121,18 @@ export function AskTab({ meetingId }: { meetingId: string }) {
           e.preventDefault();
           send(question);
         }}
-        className="flex gap-2 p-4 border-t border-slate-200 bg-slate-50/50"
+        className="flex gap-2 p-4 border-t border-white/50 bg-white/20"
       >
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask anything about this meeting…"
-          className="flex-1 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-300"
+          className="flex-1 border border-white/60 rounded-full px-4 py-2.5 text-sm bg-white/60 backdrop-blur-xl focus:outline-none focus:ring-2 focus:ring-brand-300"
         />
         <button
           type="submit"
           disabled={sending}
-          className="flex items-center justify-center h-10 w-10 shrink-0 bg-brand-600 text-white rounded-xl hover:bg-brand-700 disabled:opacity-50 transition-colors"
+          className="flex items-center justify-center h-10 w-10 shrink-0 bg-brand-600 text-white rounded-full hover:bg-brand-700 disabled:opacity-50 transition-colors shadow-glass-sm"
         >
           <Send size={16} />
         </button>
