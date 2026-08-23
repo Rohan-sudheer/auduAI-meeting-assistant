@@ -1,55 +1,54 @@
 import json
 import time
 
-from google import genai
-from google.genai import errors, types
+from openai import InternalServerError, OpenAI, RateLimitError
 
 from app.config import settings
 
-_client: genai.Client | None = None
+_client: OpenAI | None = None
 
-# Free-tier rate limit (429) and transient overload (503) both resolve themselves if you
-# wait - the free tier's RPM window resets every ~60s. Back off and retry instead of failing
-# the whole meeting over a temporary quota bump.
-_RETRYABLE_CODES = {429, 503}
-_BACKOFF_SECONDS = [15, 35, 60]
+# Rate limits (429) and transient server errors (5xx) both resolve themselves if you wait a
+# short moment - back off and retry instead of failing the whole meeting over a momentary blip.
+_RETRYABLE_EXCEPTIONS = (RateLimitError, InternalServerError)
+_BACKOFF_SECONDS = [5, 15, 30]
 
 
-def get_client() -> genai.Client:
+def get_client() -> OpenAI:
     global _client
     if _client is None:
-        _client = genai.Client(api_key=settings.gemini_api_key)
+        _client = OpenAI(api_key=settings.openai_api_key)
     return _client
 
 
-def _generate(model: str, system: str, user: str):
+def _create_completion(model: str, system: str, user: str):
     client = get_client()
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
     last_error: Exception | None = None
     for attempt, wait in enumerate([0, *_BACKOFF_SECONDS]):
         if wait:
             time.sleep(wait)
         try:
-            return client.models.generate_content(
+            return client.chat.completions.create(
                 model=model,
-                contents=user,
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    response_mime_type="application/json",
-                ),
+                response_format={"type": "json_object"},
+                messages=messages,
             )
-        except errors.APIError as exc:
-            if exc.code not in _RETRYABLE_CODES or attempt == len(_BACKOFF_SECONDS):
+        except _RETRYABLE_EXCEPTIONS as exc:
+            if attempt == len(_BACKOFF_SECONDS):
                 raise
             last_error = exc
             continue
     raise last_error  # unreachable, satisfies type checker
 
 
-def chat_json(system: str, user: str, model: str = "gemini-3.6-flash") -> dict:
+def chat_json(system: str, user: str, model: str = "gpt-4o-mini") -> dict:
     last_error: Exception | None = None
     for _ in range(2):  # one retry on malformed JSON
-        response = _generate(model, system, user)
-        content = response.text or "{}"
+        response = _create_completion(model, system, user)
+        content = response.choices[0].message.content or "{}"
         try:
             return json.loads(content)
         except json.JSONDecodeError as exc:
@@ -58,29 +57,18 @@ def chat_json(system: str, user: str, model: str = "gemini-3.6-flash") -> dict:
     raise ValueError(f"LLM did not return valid JSON after retry: {last_error}")
 
 
-EMBED_BATCH_SIZE = 100  # Gemini's embed_content caps at 100 texts per request
-
-
-def _embed_batch(model: str, batch: list[str]):
+def embed(texts: list[str], model: str = "text-embedding-3-small") -> list[list[float]]:
     client = get_client()
     last_error: Exception | None = None
     for attempt, wait in enumerate([0, *_BACKOFF_SECONDS]):
         if wait:
             time.sleep(wait)
         try:
-            return client.models.embed_content(model=model, contents=batch)
-        except errors.APIError as exc:
-            if exc.code not in _RETRYABLE_CODES or attempt == len(_BACKOFF_SECONDS):
+            response = client.embeddings.create(model=model, input=texts)
+            return [item.embedding for item in response.data]
+        except _RETRYABLE_EXCEPTIONS as exc:
+            if attempt == len(_BACKOFF_SECONDS):
                 raise
             last_error = exc
             continue
     raise last_error  # unreachable, satisfies type checker
-
-
-def embed(texts: list[str], model: str = "gemini-embedding-001") -> list[list[float]]:
-    all_embeddings: list[list[float]] = []
-    for i in range(0, len(texts), EMBED_BATCH_SIZE):
-        batch = texts[i : i + EMBED_BATCH_SIZE]
-        response = _embed_batch(model, batch)
-        all_embeddings.extend(e.values for e in response.embeddings)
-    return all_embeddings

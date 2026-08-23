@@ -12,7 +12,7 @@ DB_PATH = DATA_DIR / "db.sqlite3"
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", extra="ignore")
 
-    gemini_api_key: str = ""
+    openai_api_key: str = ""
     deepgram_api_key: str = ""
 
 

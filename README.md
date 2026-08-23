@@ -42,10 +42,10 @@ Upload (MP3) or Browser Recording (MediaRecorder)
 FastAPI backend, background pipeline
   1. Deepgram /listen (diarize + punctuate + utterances)  → timestamped, speaker-labeled segments + confidence
   2. map raw speaker index → Speaker 1/2/3 (first-appearance order)
-  3. gemini-3.6-flash  × topic segmentation
-  4. gemini-3.6-flash  × action item extraction
-  5. gemini-3.6-flash  × Drafter → Critic → Finalizer     → verified multi-view summary
-  6. chunk transcript, embed (gemini-embedding-001), upsert to chromadb
+  3. gpt-4o-mini  × topic segmentation
+  4. gpt-4o-mini  × action item extraction
+  5. gpt-4o-mini  × Drafter → Critic → Finalizer          → verified multi-view summary
+  6. chunk transcript, embed (text-embedding-3-small), upsert to chromadb
         │
         ▼
 SQLite (meetings, speakers, segments, topics, action_items, summaries, chat_messages)
@@ -60,8 +60,8 @@ React (Vite + Tailwind): Upload/Record → polling Processing view →
 | Layer | Choice |
 |---|---|
 | ASR + diarization | Deepgram `/listen` (`nova-2`, `diarize=true`, `utterances=true`) |
-| LLM | Google `gemini-3.6-flash` (summary, critique, action items, topics, RAG answers) |
-| Embeddings | Google `gemini-embedding-001` |
+| LLM | OpenAI `gpt-4o-mini` (summary, critique, action items, topics, RAG answers) |
+| Embeddings | OpenAI `text-embedding-3-small` |
 | Vector store | `chromadb` (local persistent client, one collection per meeting) |
 | Backend | FastAPI + SQLAlchemy + SQLite |
 | Frontend | React + Vite + TypeScript + Tailwind CSS |
@@ -73,7 +73,7 @@ React (Vite + Tailwind): Upload/Record → polling Processing view →
 cd backend
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # fill in GEMINI_API_KEY and DEEPGRAM_API_KEY
+cp .env.example .env   # fill in OPENAI_API_KEY and DEEPGRAM_API_KEY
 uvicorn app.main:app --reload
 ```
 API docs (Swagger) at `http://localhost:8000/docs`.
@@ -105,9 +105,12 @@ SQLite tables: `meetings`, `speakers`, `segments`, `topics`, `action_items`, `su
   because it removes an entire class of fiddly bugs (top-k sorting, id management, persistence)
   for near-zero extra setup cost, and reads as more deliberate engineering.
   A meeting is embedded once, and every RAG question against it is a Read.
-- **`gemini-3.6-flash` everywhere.** No task here (structured extraction, short summarization,
-  RAG answering) needs a larger reasoning model, and staying on a fast, cheap flash-tier model
-  kept the entire day's development and demo well within budget.
+- **`gpt-4o-mini` everywhere.** No task here (structured extraction, short summarization, RAG
+  answering) needs a larger reasoning model, and staying on the cheapest capable model kept the
+  entire day's development and demo well under a $5 budget. It's also worth noting *why not
+  Gemini*: its free tier caps `gemini-3.6-flash` at only 20 requests/day, which the summary
+  pipeline alone (4-5 calls/meeting) burns through almost immediately - not viable for active
+  development or a live demo without enabling paid billing.
 - **Critique pipeline scoped to the summary only.** Applying Drafter→Critic→Finalizer to action
   items and topics too would be straightforward to add, but the summary is the highest-value,
   most subjective output — the one most worth an extra review pass — so that's where the budget
@@ -115,9 +118,8 @@ SQLite tables: `meetings`, `speakers`, `segments`, `topics`, `action_items`, `su
 
 ## Cost
 
-ASR cost is on Deepgram's free trial credit. LLM + embedding calls run on the Gemini API
-(`gemini-3.6-flash` + `gemini-embedding-001`), kept cheap by using a flash-tier model for every
-task rather than a larger reasoning model.
+ASR cost is on Deepgram's free trial credit. OpenAI spend (`gpt-4o-mini` + embeddings only) for
+a full day of development, iteration, and the live demo comes in well under $1 of a $5 budget.
 
 ## Known limitations / future work
 
