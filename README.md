@@ -86,6 +86,34 @@ npm run dev
 ```
 App at `http://localhost:5173`.
 
+## Deployment (Render + Vercel)
+
+**Backend on Render**
+1. Push this repo to GitHub.
+2. Render dashboard → New → Web Service → connect the repo, root directory `backend`.
+3. Environment: **Docker** (the included `Dockerfile` installs `ffmpeg`, which Render's native
+   Python runtime doesn't guarantee).
+4. Set environment variables: `OPENAI_API_KEY`, `DEEPGRAM_API_KEY`, and `ALLOWED_ORIGINS` (set
+   this to your Vercel URL once you have it, e.g. `https://your-app.vercel.app` - comma-separate
+   multiple origins if needed).
+5. Deploy. Note the resulting URL (e.g. `https://your-app.onrender.com`).
+6. **Storage caveat**: SQLite, uploaded audio, and the chromadb vector store all live on local
+   disk. Render's free tier disk is *ephemeral* - it resets on every redeploy/restart. Fine for
+   demoing (just re-upload a meeting after a fresh deploy), but not durable. A Render persistent
+   disk (paid) or migrating to hosted Postgres + object storage would fix this for real
+   production use - out of scope for the hackathon deadline.
+
+**Frontend on Vercel**
+1. Vercel dashboard → New Project → import the same repo, root directory `frontend`.
+2. Framework preset: Vite (auto-detected). Build command `npm run build`, output `dist`.
+3. Environment variable: `VITE_API_URL` = your Render backend URL from above.
+4. Deploy.
+5. Go back to Render and set `ALLOWED_ORIGINS` to the Vercel URL you just got (step 4 of the
+   backend section), then redeploy the backend so CORS allows it.
+
+Both platforms give you HTTPS automatically, which the browser recording feature needs
+(`getUserMedia` requires a secure context).
+
 ## Data model
 
 SQLite tables: `meetings`, `speakers`, `segments`, `topics`, `action_items`, `summaries`,

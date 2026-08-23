@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
     deepgram_api_key: str = ""
+    allowed_origins: str = "http://localhost:5173"
 
 
 settings = Settings()
