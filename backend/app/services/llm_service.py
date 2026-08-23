@@ -1,33 +1,33 @@
 import json
 
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 from app.config import settings
 
-_client: OpenAI | None = None
+_client: genai.Client | None = None
 
 
-def get_client() -> OpenAI:
+def get_client() -> genai.Client:
     global _client
     if _client is None:
-        _client = OpenAI(api_key=settings.openai_api_key)
+        _client = genai.Client(api_key=settings.gemini_api_key)
     return _client
 
 
-def chat_json(system: str, user: str, model: str = "gpt-4o-mini") -> dict:
+def chat_json(system: str, user: str, model: str = "gemini-3.6-flash") -> dict:
     client = get_client()
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": user},
-    ]
     last_error: Exception | None = None
     for _ in range(2):  # one retry on malformed JSON
-        response = client.chat.completions.create(
+        response = client.models.generate_content(
             model=model,
-            response_format={"type": "json_object"},
-            messages=messages,
+            contents=user,
+            config=types.GenerateContentConfig(
+                system_instruction=system,
+                response_mime_type="application/json",
+            ),
         )
-        content = response.choices[0].message.content or "{}"
+        content = response.text or "{}"
         try:
             return json.loads(content)
         except json.JSONDecodeError as exc:
@@ -36,7 +36,7 @@ def chat_json(system: str, user: str, model: str = "gpt-4o-mini") -> dict:
     raise ValueError(f"LLM did not return valid JSON after retry: {last_error}")
 
 
-def embed(texts: list[str], model: str = "text-embedding-3-small") -> list[list[float]]:
+def embed(texts: list[str], model: str = "gemini-embedding-001") -> list[list[float]]:
     client = get_client()
-    response = client.embeddings.create(model=model, input=texts)
-    return [item.embedding for item in response.data]
+    response = client.models.embed_content(model=model, contents=texts)
+    return [e.values for e in response.embeddings]
