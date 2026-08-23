@@ -33,12 +33,12 @@ export function UploadDropzone({ onFile, disabled }: Props) {
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/70 text-brand-600 shadow-glass-sm">
         <UploadCloud size={22} strokeWidth={2} />
       </span>
-      <span className="text-base font-semibold text-slate-800">Drop an MP3 here, or click to browse</span>
+      <span className="text-base font-semibold text-slate-800">Drop an audio file here, or click to browse</span>
       <span className="text-sm text-slate-500">Upload a meeting recording to transcribe and summarize</span>
       <input
         ref={inputRef}
         type="file"
-        accept="audio/*"
+        accept="audio/*,video/mp4,.mp3,.wav,.m4a,.mp4,.ogg,.webm"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
