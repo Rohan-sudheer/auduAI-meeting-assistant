@@ -1,9 +1,10 @@
+import json
 import traceback
 from pathlib import Path
 
 from app.database import SessionLocal
-from app.models import Meeting, Segment, Speaker
-from app.services import deepgram_service
+from app.models import ActionItem, Meeting, Segment, Speaker, Summary, Topic
+from app.services import action_item_service, deepgram_service, rag_service, summary_service, topic_service
 
 UNCERTAIN_CONFIDENCE_THRESHOLD = 0.6
 
@@ -56,6 +57,65 @@ def process_meeting(meeting_id: str) -> None:
             )
 
         meeting.duration_sec = max_end_time
+        meeting.status = "summarizing"
+        db.commit()
+
+        segments = (
+            db.query(Segment)
+            .filter(Segment.meeting_id == meeting.id)
+            .order_by(Segment.order_index)
+            .all()
+        )
+
+        summary_data = summary_service.generate_summary_with_critique(segments)
+        db.add(
+            Summary(
+                meeting_id=meeting.id,
+                executive_summary=summary_data.get("executive_summary", ""),
+                meeting_purpose=summary_data.get("meeting_purpose", ""),
+                key_discussion_points=json.dumps(summary_data.get("key_discussion_points", [])),
+                decisions=json.dumps(summary_data.get("decisions", [])),
+                outcomes=json.dumps(summary_data.get("outcomes", [])),
+                critique_notes=json.dumps(summary_data.get("critique_notes", [])),
+                verified=summary_data.get("verified", False),
+            )
+        )
+
+        topics = topic_service.generate_topics(segments)
+        for t in topics:
+            db.add(
+                Topic(
+                    meeting_id=meeting.id,
+                    topic_index=str(t.get("index", "")),
+                    title=t.get("title", ""),
+                    start_time=t.get("start_time", 0.0),
+                    end_time=t.get("end_time", 0.0),
+                    summary=t.get("summary", ""),
+                )
+            )
+
+        action_items = action_item_service.generate_action_items(segments, meeting.created_at.date())
+        for item in action_items:
+            source_segment = action_item_service.find_segment_for_time(segments, item.get("start_time"))
+            db.add(
+                ActionItem(
+                    meeting_id=meeting.id,
+                    task=item.get("task", ""),
+                    owner=item.get("owner") or "Unassigned",
+                    deadline_raw=item.get("deadline_raw"),
+                    deadline_normalized=item.get("deadline_normalized"),
+                    priority=item.get("priority") or "Medium",
+                    status="Open",
+                    source_segment_id=source_segment.id if source_segment else None,
+                    source_quote=item.get("source_quote"),
+                )
+            )
+
+        meeting.status = "embedding"
+        db.commit()
+
+        rag_service.embed_and_store(meeting.id, segments)
+
         meeting.status = "ready"
         db.commit()
     except Exception as exc:  # noqa: BLE001 - background pipeline, must not raise

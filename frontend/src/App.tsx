@@ -1,8 +1,16 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import { MeetingPage } from "./pages/MeetingPage";
+import { UploadPage } from "./pages/UploadPage";
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h1 className="text-2xl font-semibold text-gray-800">Meeting Summariser</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<UploadPage />} />
+        <Route path="/meetings/:id" element={<MeetingPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
