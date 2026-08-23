@@ -5,12 +5,13 @@ import { api, type Meeting } from "../api/client";
 import { ProcessingView } from "../components/ProcessingView";
 import { ActionItemsTab } from "../components/tabs/ActionItemsTab";
 import { AskTab } from "../components/tabs/AskTab";
+import { SpeakingStatsTab } from "../components/tabs/SpeakingStatsTab";
 import { SummaryTab } from "../components/tabs/SummaryTab";
 import { TopicsTab } from "../components/tabs/TopicsTab";
 import { TranscriptTab } from "../components/tabs/TranscriptTab";
 import { usePolling } from "../hooks/usePolling";
 
-const TABS = ["Transcript", "Summary", "Action Items", "Topics", "Ask"] as const;
+const TABS = ["Transcript", "Summary", "Action Items", "Topics", "Speaking Stats", "Ask"] as const;
 type Tab = (typeof TABS)[number];
 
 const TERMINAL_STATUSES = new Set(["ready", "failed"]);
@@ -57,6 +58,7 @@ export function MeetingPage() {
       {tab === "Summary" && <SummaryTab meetingId={meeting.id} />}
       {tab === "Action Items" && <ActionItemsTab meetingId={meeting.id} />}
       {tab === "Topics" && <TopicsTab meetingId={meeting.id} />}
+      {tab === "Speaking Stats" && <SpeakingStatsTab meetingId={meeting.id} />}
       {tab === "Ask" && <AskTab meetingId={meeting.id} />}
     </div>
   );

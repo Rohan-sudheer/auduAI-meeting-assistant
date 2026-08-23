@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { api, type Segment } from "../../api/client";
+import { api, type Segment, type Speaker } from "../../api/client";
+import { SpeakerRenameModal } from "../SpeakerRenameModal";
 
 const PAUSE_THRESHOLD_SEC = 1.5;
 
@@ -26,17 +27,32 @@ function colorFor(label: string | null): string {
 
 export function TranscriptTab({ meetingId }: { meetingId: string }) {
   const [segments, setSegments] = useState<Segment[]>([]);
+  const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [renamingSpeakerId, setRenamingSpeakerId] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .getTranscript(meetingId)
-      .then(setSegments)
+    Promise.all([api.getTranscript(meetingId), api.getSpeakers(meetingId)])
+      .then(([segs, spks]) => {
+        setSegments(segs);
+        setSpeakers(spks);
+      })
       .finally(() => setLoading(false));
   }, [meetingId]);
 
+  const saveRename = async (speakerId: string, name: string) => {
+    const updated = await api.renameSpeaker(meetingId, speakerId, name);
+    setSpeakers((prev) => prev.map((s) => (s.id === speakerId ? updated : s)));
+    setSegments((prev) =>
+      prev.map((s) => (s.speaker_id === speakerId ? { ...s, speaker_label: updated.display_name } : s))
+    );
+    setRenamingSpeakerId(null);
+  };
+
   if (loading) return <p className="text-gray-400 text-sm">Loading transcript…</p>;
   if (segments.length === 0) return <p className="text-gray-400 text-sm">No transcript available.</p>;
+
+  const renamingSpeaker = speakers.find((s) => s.id === renamingSpeakerId) ?? null;
 
   return (
     <div className="space-y-1">
@@ -60,13 +76,14 @@ export function TranscriptTab({ meetingId }: { meetingId: string }) {
               <span className="text-xs text-gray-400 font-mono pt-0.5 w-12 shrink-0">
                 {formatTimestamp(s.start_time)}
               </span>
-              <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full h-fit shrink-0 ${colorFor(
+              <button
+                onClick={() => s.speaker_id && setRenamingSpeakerId(s.speaker_id)}
+                className={`text-xs font-medium px-2 py-0.5 rounded-full h-fit shrink-0 hover:ring-2 hover:ring-offset-1 ${colorFor(
                   s.speaker_label
                 )}`}
               >
                 {s.speaker_label ?? "Unknown"}
-              </span>
+              </button>
               <span className="text-gray-800 text-sm leading-relaxed">{s.text}</span>
               {s.is_uncertain && (
                 <span className="text-xs text-amber-600 shrink-0 ml-auto" title="Low transcription confidence">
@@ -77,6 +94,15 @@ export function TranscriptTab({ meetingId }: { meetingId: string }) {
           </div>
         );
       })}
+
+      {renamingSpeaker && (
+        <SpeakerRenameModal
+          currentLabel={renamingSpeaker.display_label}
+          currentName={renamingSpeaker.display_name}
+          onClose={() => setRenamingSpeakerId(null)}
+          onSave={(name) => saveRename(renamingSpeaker.id, name)}
+        />
+      )}
     </div>
   );
 }
