@@ -7,6 +7,8 @@ multi-view summary, extracted action items, topic segmentation, speaker analytic
 Built for the **Unthinkables** campus recruitment hackathon round.
 
 **Demo video:** https://drive.google.com/file/d/1HmhOG6szIgiw6oRlNRClj8iXxX4VAANy/view?usp=drive_link
+**WEBSITE LINK:** https://audu-ai-meeting-assistant.vercel.app
+
 
 ## Highlights
 
