@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     deepgram_api_key: str = ""
     allowed_origins: str = "http://localhost:5173"
+    # Optional regex for origins that change per deploy, e.g. Vercel preview URLs:
+    # https://meeting-summariser-.*\.vercel\.app
+    allowed_origin_regex: str | None = None
 
 
 settings = Settings()

@@ -11,7 +11,9 @@ app = FastAPI(title="Meeting Summariser API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip() for origin in settings.allowed_origins.split(",")],
+    # Browsers send the origin without a trailing slash, so strip any that were pasted in.
+    allow_origins=[o.strip().rstrip("/") for o in settings.allowed_origins.split(",") if o.strip()],
+    allow_origin_regex=settings.allowed_origin_regex or None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
