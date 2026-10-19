@@ -15,9 +15,9 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     deepgram_api_key: str = ""
     allowed_origins: str = "http://localhost:5173"
-    # Optional regex for origins that change per deploy, e.g. Vercel preview URLs:
-    # https://meeting-summariser-.*\.vercel\.app
-    allowed_origin_regex: str | None = None
+    # Regex for origins that change per deploy (every Vercel preview/deployment URL)
+    # plus the custom domain, so they work without touching ALLOWED_ORIGINS.
+    allowed_origin_regex: str | None = r"https://(audu-ai-meeting-assistant[a-z0-9-]*\.vercel\.app|auduai\.rohantech\.in)"
 
 
 settings = Settings()
