@@ -12,7 +12,9 @@ app = FastAPI(title="Meeting Summariser API")
 app.add_middleware(
     CORSMiddleware,
     # Browsers send the origin without a trailing slash, so strip any that were pasted in.
-    allow_origins=[o.strip().rstrip("/") for o in settings.allowed_origins.split(",") if o.strip()],
+    # The custom domain is always allowed so a misconfigured env var can't lock it out.
+    allow_origins=["https://auduai.rohantech.in"]
+    + [o.strip().rstrip("/") for o in settings.allowed_origins.split(",") if o.strip()],
     allow_origin_regex=settings.allowed_origin_regex or None,
     allow_credentials=True,
     allow_methods=["*"],
